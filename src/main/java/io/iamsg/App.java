@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @author SG
  */
@@ -11,13 +13,52 @@ public class App {
     public static void main(String[] args) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
             menu();
+            for (int i = 0; i < 6; ++i) {
+                System.out.println(String.format("Enter %s%s turn", i + 1, pos(i + 1)));
+                turn(br);
+            }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
     }
 
+    private static String pos(int i) {
+        if (i == 1) {
+            return "st";
+        } else if (i == 2) {
+            return "nd";
+        } else if (i == 3) {
+            return "rd";
+        }
+        return "th";
+    }
+
+    private static void turn(BufferedReader br) throws IOException {
+        String word = null;
+        int count = 0;
+        do {
+            if (count > 0) {
+                System.out.println("Enter a five letter english word");
+            }
+            word = br.readLine();
+            count++;
+        } while (word.length() != 5 || !alphabetsOnly(word));
+        System.out.println(word);
+    }
+
+    private static boolean alphabetsOnly(String word) {
+        if (word == null || word == "" || StringUtils.isBlank(word)) {
+            return false;
+        }
+        for (int i = 0; i < word.length(); i++) {
+            if (!Character.isLetter(word.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private static void menu() {
-        // TODO: Create default display method
         System.out.println();
         System.out.println(
                 "***************************************************************************************************");
