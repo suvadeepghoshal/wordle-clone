@@ -106,6 +106,7 @@ public class App {
     private static List<Word> getFromResponse(String data) {
         Gson gson = new Gson();
         List<Word> list = null;
+        List<Object> tagList = null;
         Word word = null;
         if (log) {
             System.out.println("LOG :: From response as JSON ---->");
@@ -118,14 +119,13 @@ public class App {
             JsonObject finding = (JsonObject) f;
             word.setScore(finding.get("score").getAsString());
             word.setWord(finding.get("word").getAsString());
-            // JsonArray tags = finding.get("tags").getAsJsonArray();
-            // if (tags != null) {
-            // List<Object> tagList = new ArrayList<Object>();
-            // for (Object t : tags) {
-            // tagList.add(t);
-            // }
-            // word.setTags(tagList);
-            // }
+            tagList = new ArrayList<Object>();
+            if (finding.has("tags")) {
+                JsonArray tags = finding.get("tags").getAsJsonArray();
+                for (Object t : tags)
+                    tagList.add(t);
+                word.setTags(tagList);
+            }
             list.add(word);
         }
         return list;
