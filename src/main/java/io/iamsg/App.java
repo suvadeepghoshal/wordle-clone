@@ -52,9 +52,20 @@ public class App {
     public static void main(String[] args) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in))) {
             menu();
+            boolean isWon = false;
             for (int i = 0; i < 6; ++i) {
                 System.out.println(String.format("Enter %s%s turn", i + 1, pos(i + 1)));
-                turn(br);
+                String choice = turn(br);
+                if (choice.equals(wordle)) {
+                    isWon = true;
+                    break;
+                }
+            }
+            if (isWon)
+                System.out.println("Congratulations you guessed the WORDLE");
+            else {
+                System.out.println("Sorry you are out of tries");
+                System.out.println("The WORDLE for this game is: " + wordle);
             }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
@@ -146,7 +157,7 @@ public class App {
         return "th";
     }
 
-    private static void turn(BufferedReader br) throws IOException {
+    private static String turn(BufferedReader br) throws IOException {
         String word = null;
         int count = 0;
         do {
@@ -156,7 +167,22 @@ public class App {
             word = br.readLine();
             count++;
         } while (word.length() != 5 || !alphabetsOnly(word));
-        System.out.println(word);
+        play(word);
+        return word;
+    }
+
+    private static void play(String word) {
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < 5; i++) {
+            if (word.charAt(i) == wordle.charAt(i))
+                result.append(ANSI_GREEN + String.valueOf(word.charAt(i)) + ANSI_RESET);
+            else if (wordle.contains(String.valueOf(word.charAt(i))))
+                result.append(ANSI_YELLOW + String.valueOf(word.charAt(i)) + ANSI_RESET);
+            else
+                result.append(String.valueOf(word.charAt(i)));
+
+        }
+        System.out.println(String.valueOf(result));
     }
 
     private static boolean alphabetsOnly(String word) {
