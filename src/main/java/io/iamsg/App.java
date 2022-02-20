@@ -7,6 +7,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -23,21 +24,29 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class App {
 
+    private static final String ANSI_BLUE = "\u001B[34m";
     private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_YELLOW = "\u001B[33m";
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String URL = "https://api.datamuse.com/words";
-    private static final String MEANS_LIKE = "do not surrender";
+    private static String MEANS_LIKE = null;
     private static String wordle = null;
     private static final boolean log = true; // make false for prod
 
     static {
-        final long start = System.currentTimeMillis();
-        wordle = getWordle();
-        final long end = System.currentTimeMillis();
-        if (log) {
-            System.out.println("LOG :: computing time : " + (end - start) / 1000 + " seconds");
-            System.out.println("LOG :: Wordle generated is: " + wordle);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        moodMenu();
+        try {
+            MEANS_LIKE = reader.readLine();
+            final long start = System.currentTimeMillis();
+            wordle = getWordle();
+            final long end = System.currentTimeMillis();
+            if (log) {
+                System.out.println("LOG :: computing time : " + (end - start) / 1000 + " seconds");
+                System.out.println("LOG :: Wordle generated is: " + wordle);
+            }
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
         }
     }
 
@@ -53,6 +62,20 @@ public class App {
         }
     }
 
+    private static void moodMenu() {
+        System.out.println();
+        System.out
+                .println("~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~");
+        System.out.println("Any thought?");
+        System.out.println("It can be how is your mood, or any thing you want to say or any message");
+        System.out.println("It can be a word or a sentence, keep it short and crisp");
+        System.out.println("This will help our system get the magic word for you based on your mood/personality");
+        System.out.println("Hence it is " + ANSI_BLUE + "WOR" + ANSI_YELLOW + "DIC" + ANSI_GREEN + "TED" + ANSI_RESET);
+        System.out
+                .println("~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~~-~-~-~");
+        System.out.println();
+    }
+
     private static String getWordle() {
         HttpResponse<JsonNode> response = null;
         List<Word> findings = null;
@@ -64,8 +87,9 @@ public class App {
             // to prevent from ----- org.json.JSONException ---------
             if (response.getStatus() == 200 && response.getBody() != null) {
                 findings = getFromResponse(response.getBody().toString());
-                findings.forEach(System.out::println);
-                SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+                if (log)
+                    findings.forEach(System.out::println);
+                SecureRandom random = SecureRandom.getInstance("SHA1PRNG"); // using SHA1PRNG security encoding
                 int index = 0;
                 do {
                     index = random.nextInt(findings.size());
