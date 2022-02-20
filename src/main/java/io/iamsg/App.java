@@ -23,9 +23,10 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class App {
 
-    private static final String ANSI_BLUE = "\u001B[34m";
+    private static final String ANSI_RED = "\u001B[31m";
     private static final String ANSI_GREEN = "\u001B[32m";
     private static final String ANSI_YELLOW = "\u001B[33m";
+    private static final String ANSI_BLUE = "\u001B[34m";
     private static final String ANSI_RESET = "\u001B[0m";
     private static final String URL = "https://api.datamuse.com/words";
     private static String MEANS_LIKE = null;
@@ -61,15 +62,32 @@ public class App {
                     break;
                 }
             }
-            if (isWon)
+            if (isWon) {
                 System.out.println("Congratulations you guessed the WORDLE");
-            else {
+                System.out.println("Do you want to know more about " + wordle);
+                String choice = null;
+                int count = 0;
+                do {
+                    if (count > 0)
+                        System.out.println("Enter Y/y for " + ANSI_GREEN + "YES" + ANSI_RESET + " and N/n for "
+                                + ANSI_RED + "NO" + ANSI_RESET);
+                    choice = br.readLine();
+                    count++;
+                } while (!choice.toLowerCase().equals("y") && !choice.toLowerCase().equals("n"));
+                if (choice.toLowerCase().equals("y")) {
+                    findMore(wordle); // we will hit the dictionary API to get the details
+                }
+            } else {
                 System.out.println("Sorry you are out of tries");
                 System.out.println("The WORDLE for this game is: " + wordle);
             }
         } catch (IOException ex) {
             System.err.println(ex.getMessage());
         }
+    }
+
+    private static void findMore(String W) {
+        System.out.println("Lets find out!!");
     }
 
     private static void moodMenu() {
