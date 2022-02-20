@@ -1,6 +1,12 @@
 # Compiled class file
 *.class
 
+# Editor config
+*.json
+
+# Maven compiled directory
+/target
+
 # Log file
 *.log
 
