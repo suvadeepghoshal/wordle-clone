@@ -87,7 +87,168 @@ public class App {
     }
 
     private static void findMore(String W) {
-        System.out.println("Lets find out!!");
+        final String dictionaryAPIURL = "https://api.dictionaryapi.dev/api/v2/entries/en/";
+        HttpResponse<JsonNode> response = null;
+        try {
+            response = Unirest.get(dictionaryAPIURL + wordle).asJson();
+            if (response.getStatus() == 200 && response.getBody() != null) {
+                Gson gson = new Gson();
+                if (log)
+                    System.out.println(response.getBody().toString());
+                JsonArray results = gson.fromJson(response.getBody().toString(), JsonArray.class);
+                List<Dictionary> dictionaries = new ArrayList<Dictionary>();
+                for (Object r : results) {
+                    // parse it
+                    JsonObject result = (JsonObject) r;
+                    Dictionary d = new Dictionary();
+                    if (result.has("word"))
+                        d.setWord(result.get("word").getAsString());
+                    if (result.has("phonetic"))
+                        d.setPhonetic(result.get("phonetic").getAsString());
+                    if (result.has("phonetics")) {
+                        JsonArray phonetics = result.get("phonetics").getAsJsonArray();
+                        List<Phonetic> phoneticList = new ArrayList<Phonetic>();
+                        for (Object phon : phonetics) {
+                            JsonObject phonetic = (JsonObject) phon;
+                            Phonetic p = new Phonetic();
+                            if (phonetic.has("text"))
+                                p.setText(phonetic.get("text").getAsString());
+                            if (phonetic.has("audio"))
+                                p.setAudio(phonetic.get("audio").getAsString());
+                            if (phonetic.has("sourceUrl"))
+                                p.setSourceUrl(phonetic.get("sourceUrl").getAsString());
+                            if (phonetic.has("license")) {
+                                JsonObject license = phonetic.get("license").getAsJsonObject();
+                                License l = new License();
+                                if (license.has("name"))
+                                    l.setName(license.get("name").getAsString());
+                                if (license.has("url"))
+                                    l.setUrl(license.get("url").getAsString());
+                                p.setLicense(l);
+                            }
+                            phoneticList.add(p);
+                        }
+                        d.setPhonetics(phoneticList);
+                    }
+                    if (result.has("meanings")) {
+                        List<Meaning> meaningList = new ArrayList<Meaning>();
+                        JsonArray meanings = result.get("meanings").getAsJsonArray();
+                        for (Object M : meanings) {
+                            JsonObject meaning = (JsonObject) M;
+                            Meaning m = new Meaning();
+                            if (meaning.has("partOfSpeech"))
+                                m.setPartOfSpeech(meaning.get("partOfSpeech").getAsString());
+                            if (meaning.has("definitions")) {
+                                List<Defintion> defintionList = new ArrayList<Defintion>();
+                                JsonArray definitions = meaning.get("definitions").getAsJsonArray();
+                                for (Object D : definitions) {
+                                    Defintion def = new Defintion();
+                                    JsonObject definition = (JsonObject) D;
+                                    if (definition.has("definition"))
+                                        def.setDefinition(definition.get("definition").getAsString());
+                                    if (definition.has("synonyms")) {
+                                        List<Object> synonyms = new ArrayList<Object>();
+                                        JsonArray S = definition.get("synonyms").getAsJsonArray();
+                                        for (Object s : S) {
+                                            synonyms.add(s);
+                                        }
+                                        def.setSynonyms(synonyms);
+                                    }
+                                    defintionList.add(def);
+                                }
+                                m.setDefinitions(defintionList);
+                            }
+                            meaningList.add(m);
+                        }
+                        d.setMeanings(meaningList);
+                    }
+                    if (result.has("license")) {
+                        License L = new License();
+                        JsonObject license = result.get("license").getAsJsonObject();
+                        if (license.has("name"))
+                            L.setName(license.get("name").getAsString());
+                        if (license.has("url"))
+                            L.setUrl(license.get("url").getAsString());
+                        d.setLicense(L);
+                    }
+                    if (result.has("sourceUrls")) {
+                        JsonArray sourceUrls = result.get("sourceUrls").getAsJsonArray();
+                        List<Object> urlList = new ArrayList<Object>();
+                        for (Object SU : sourceUrls) {
+                            urlList.add(SU);
+                        }
+                        d.setSourceUrls(urlList);
+                    }
+                    dictionaries.add(d);
+                }
+                showDictionaryInfo(dictionaries);
+            }
+        } catch (UnirestException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private static void showDictionaryInfo(List<Dictionary> dictionaries) {
+        for (Dictionary dict : dictionaries) {
+            System.out.println();
+            System.out.println(
+                    "*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~**~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*");
+            System.out.println("The wordle word is: " + dict.getWord());
+            System.out.println("The phonetic for " + dict.getWord() + " is: " + dict.getPhonetic());
+            // phonetics
+            System.out.println();
+            if (dict.getPhonetics() != null && !dict.getPhonetics().isEmpty()) {
+                System.out.println("Some more information about the phonetics --->");
+                int i = 1;
+                for (Phonetic phon : dict.getPhonetics()) {
+                    System.out.println(" .......... " + i + pos(i) + " obeservation ..........");
+                    System.out.println("Text: " + phon.getText());
+                    System.out.println("Pronounciation audio link: " + phon.getAudio());
+                    if (phon.getLicense() != null) {
+                        System.out.println("License name: " + phon.getLicense().getName());
+                        System.out.println("License URL: " + phon.getLicense().getUrl());
+                    }
+                    i++;
+                    System.out.println(
+                            "------------------------------------------------------------------------------------------------------");
+                }
+            }
+            // meanings
+            System.out.println();
+            if (dict.getMeanings() != null && !dict.getMeanings().isEmpty()) {
+                System.out.println("Some information on the meanings --->");
+                int i = 1;
+                for (Meaning mean : dict.getMeanings()) {
+                    System.out.println(" .......... " + i + pos(i) + " obeservation ..........");
+                    System.out.println("Parts of speech: " + mean.getPartOfSpeech());
+                    if (!mean.getDefinitions().isEmpty()) {
+                        System.out.println("Some information about definitions --->");
+                        for (Defintion def : mean.getDefinitions()) {
+                            System.out.println("Definiton: " + def.getDefinition());
+                            if (def.getSynonyms() != null && !def.getSynonyms().isEmpty())
+                                System.out.println("Synonyms: " + def.getSynonyms().toString());
+                        }
+                    }
+                    i++;
+                    System.out.println(
+                            "------------------------------------------------------------------------------------------------------");
+                }
+            }
+            // license
+            System.out.println();
+            if (dict.getLicense() != null) {
+                System.out.println("License name: " + dict.getLicense().getName());
+                System.out.println("License URL: " + dict.getLicense().getUrl());
+            }
+            // source urls
+            System.out.println();
+            if (dict.getSourceUrls() != null) {
+                System.out.println("Source URLS: " + dict.getSourceUrls().toString());
+            }
+            System.out.println(
+                    "*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~**~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*-*~_~*");
+            System.out.println();
+        }
     }
 
     private static void moodMenu() {
