@@ -4,7 +4,7 @@
 
 ## Features
 
-- Guess the WORDLE WORDLE in six tries
+- Guess the WORDLE WORD in six tries
 - After each try the color of the letter will change to show how close your guess was to the word
 - *Rules*
   - Each word has to be a valid five letter english word
