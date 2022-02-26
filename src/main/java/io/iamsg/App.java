@@ -381,7 +381,7 @@ public class App {
         System.out.println(
                 "***************************************************************************************************");
         System.out.println("!!! Welcome to WORDICTED !!!");
-        System.out.println("Guess the WORDLE WORDLE in six tries");
+        System.out.println("Guess the WORDLE WORD in six tries");
         System.out.println(
                 "After each try the color of the letter will change to show how close your guess was to the word");
         System.out.println(
