@@ -31,7 +31,7 @@ public class App {
     private static final String URL = "https://api.datamuse.com/words";
     private static String MEANS_LIKE = null;
     private static String wordle = null;
-    private static final boolean log = true; // make false for prod
+    private static final boolean log = false; // make false for prod
 
     static {
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
